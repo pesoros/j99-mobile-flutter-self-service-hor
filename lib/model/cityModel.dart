@@ -22,12 +22,10 @@ class CityModel {
     return list.map((item) => CityModel.fromJson(item)).toList();
   }
 
-  ///this method will prevent the override of toString
   String userAsString() {
     return '#${this.id} ${this.namaKota}';
   }
 
-  ///custom comparing function to check if two users are equal
   bool isEqual(CityModel model) {
     return this?.id == model?.id;
   }
