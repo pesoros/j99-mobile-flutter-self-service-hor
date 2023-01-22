@@ -1,10 +1,16 @@
 // ignore_for_file: prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:j99_mobile_flutter_self_service/screen/dashboardScreen.dart';
 
 void main() {
-  runApp(MyApp());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -14,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Juragan99 Trans Self Service',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: DashboardScreen(),
     );
