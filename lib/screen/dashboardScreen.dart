@@ -12,11 +12,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:j99_mobile_flutter_self_service/data/imageModel.dart.dart';
 import 'package:j99_mobile_flutter_self_service/data/cityModel.dart';
 import 'package:j99_mobile_flutter_self_service/data/classModel.dart';
+import 'package:j99_mobile_flutter_self_service/screen/searchResultPergiScreen.dart';
 import 'package:j99_mobile_flutter_self_service/utility/color.dart';
 import 'package:j99_mobile_flutter_self_service/utility/dimension.dart';
 import 'package:j99_mobile_flutter_self_service/utility/style.dart';
@@ -50,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   getImagePrefix() async {
     await ImagePrefix.list().then((value) {
+      if (!mounted) return;
       setState(() {
         imagePrefix = value;
         prefixLoad = false;
@@ -59,6 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   getImage() async {
     await ImageList.list().then((value) {
+      if (!mounted) return;
       setState(() {
         imageList = value;
         imageLoad = false;
@@ -68,334 +72,322 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeightMinusAppBarMinusStatusBar =
-        MediaQuery.of(context).size.height - 150;
     return Scaffold(
         backgroundColor: CustomColor.white,
-        key: scaffoldKey,
-        body: Container(
-          child: SingleChildScrollView(
-              child: ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: screenHeightMinusAppBarMinusStatusBar),
-            child: bodyWidget(context),
-          )),
+        body: Row(
+          children: [
+            carouselWidget(context),
+            SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: bodyWidget(context),
+            ),
+          ],
         ));
   }
 
   bodyWidget(BuildContext context) {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      carouselWidget(context),
-      Container(
-        alignment: Alignment.bottomCenter,
-        transform: Matrix4.translationValues(0.0, -30.0, 0.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-          color: CustomColor.white,
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.only(top: 30, right: 40, left: 40),
-              child: Column(
+    return Container(
+      width: MediaQuery.of(context).size.width / 2.5,
+      margin: EdgeInsets.only(top: 30, right: 40, left: 40),
+      child: Column(
+        children: [
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Row(
                 children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 40,
-                    child: DropdownSearch<CityModel>(
-                      mode: Mode.DIALOG,
-                      showClearButton: false,
-                      maxHeight: 250,
-                      label: "Kota Asal",
-                      showSearchBox: true,
-                      selectedItem: variable.selectedFromCity,
-                      searchBoxDecoration: InputDecoration(
-                        labelText: "Kota Asal",
-                        suffixIcon: Icon(Icons.search),
-                      ),
-                      dropdownSearchDecoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 10),
-                        labelStyle: CustomStyle.textStyle,
-                        focusedBorder: CustomStyle.focusBorder,
-                        enabledBorder: CustomStyle.focusErrorBorder,
-                        focusedErrorBorder: CustomStyle.focusErrorBorder,
-                        errorBorder: CustomStyle.focusErrorBorder,
-                        hintStyle: CustomStyle.textStyle,
-                      ),
-                      onFind: (String) async {
-                        var response = await Dio().post(
-                          dotenv.env['BASE_URL'] + "/datakota",
-                        );
-                        var dataFromCity =
-                            CityModel.fromJsonList(response.data);
-                        if (variable.selectedToCity == null)
-                          return dataFromCity;
-                        dataFromCity.removeWhere((item) =>
-                            item.namaKota ==
-                            variable.selectedToCity.toString());
-                        return dataFromCity;
-                      },
-                      onChanged: (data) {
-                        setState(() {
-                          variable.selectedFromCity = data;
-                        });
-                      },
+                  Expanded(
+                    child: Image.asset(
+                      'assets/images/j99-logo.png',
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 40,
-                    child: DropdownSearch<CityModel>(
-                        mode: Mode.DIALOG,
-                        showClearButton: false,
-                        maxHeight: 250,
-                        label: "Kota Tujuan",
-                        showSearchBox: true,
-                        selectedItem: variable.selectedToCity,
-                        searchBoxDecoration: InputDecoration(
-                          labelText: "Kota Tujuan",
-                          suffixIcon: Icon(Icons.search),
-                        ),
-                        dropdownSearchDecoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(left: 10),
-                          labelStyle: CustomStyle.textStyle,
-                          focusedBorder: CustomStyle.focusBorder,
-                          enabledBorder: CustomStyle.focusErrorBorder,
-                          focusedErrorBorder: CustomStyle.focusErrorBorder,
-                          errorBorder: CustomStyle.focusErrorBorder,
-                          hintStyle: CustomStyle.textStyle,
-                        ),
-                        onFind: (String) async {
-                          var response = await Dio().post(
-                            dotenv.env['BASE_URL'] + "/datakota",
-                          );
-                          var dataToCity =
-                              CityModel.fromJsonList(response.data);
-                          if (variable.selectedFromCity == null)
-                            return dataToCity;
-                          dataToCity.removeWhere((item) =>
-                              item.namaKota ==
-                              variable.selectedFromCity.toString());
-                          return dataToCity;
-                        },
-                        onChanged: (data) {
-                          setState(() {
-                            variable.selectedToCity = data;
-                          });
-                        }),
-                  ),
-                  Column(children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Pulang-Pergi?",
-                              style: TextStyle(
-                                  fontSize: Dimensions.defaultTextSize),
-                            ),
-                            Transform.scale(
-                              scale: 0.7,
-                              child: CupertinoSwitch(
-                                activeColor: CustomColor.red,
-                                value: variable.checkPulangPergi,
-                                onChanged: (bool value) {
-                                  setState(() {
-                                    variable.checkPulangPergi = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          child: Transform.rotate(
-                            angle: 90 * math.pi / 180,
-                            child: IconButton(
-                              icon: Icon(Icons.swap_horiz_sharp),
-                              color: CustomColor.red,
-                              onPressed: () {
-                                setState(() {
-                                  var tempFrom;
-                                  var tempTo;
-                                  tempFrom = variable.selectedFromCity;
-                                  tempTo = variable.selectedToCity;
-                                  variable.selectedFromCity = tempTo;
-                                  variable.selectedToCity = tempFrom;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        selectDatePergi(context),
-                        variable.checkPulangPergi
-                            ? SizedBox(width: 10)
-                            : Container(),
-                        variable.checkPulangPergi
-                            ? selectDatePulang(context)
-                            : Container(),
-                      ],
-                    )
-                  ]),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 40,
-                    child: DropdownSearch(
-                      mode: Mode.BOTTOM_SHEET,
-                      showClearButton: false,
-                      maxHeight: 225,
-                      items: jumlahPenumpang,
-                      label: "Jumlah Penumpang",
-                      dropdownSearchDecoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 10),
-                        labelStyle: CustomStyle.textStyle,
-                        focusedBorder: CustomStyle.focusBorder,
-                        enabledBorder: CustomStyle.focusErrorBorder,
-                        focusedErrorBorder: CustomStyle.focusErrorBorder,
-                        errorBorder: CustomStyle.focusErrorBorder,
-                        hintStyle: CustomStyle.textStyle,
-                      ),
-                      onChanged: (jumlahPenumpang) {
-                        setState(() {
-                          variable.selectedJumlahPenumpang = jumlahPenumpang;
-                        });
-                      },
-                      showSearchBox: false,
-                      selectedItem: variable.selectedJumlahPenumpang,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 40,
-                    child: DropdownSearch<ClassModel>(
-                      mode: Mode.BOTTOM_SHEET,
-                      maxHeight: 225,
-                      label: "Kelas Armada",
-                      dropdownSearchDecoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 10),
-                        labelStyle: CustomStyle.textStyle,
-                        focusedBorder: CustomStyle.focusBorder,
-                        enabledBorder: CustomStyle.focusErrorBorder,
-                        focusedErrorBorder: CustomStyle.focusErrorBorder,
-                        errorBorder: CustomStyle.focusErrorBorder,
-                        hintStyle: CustomStyle.textStyle,
-                      ),
-                      onFind: (String) async {
-                        var response = await Dio().post(
-                          dotenv.env['BASE_URL'] + "/datakelas",
-                        );
-                        var kelasArmada =
-                            ClassModel.fromJsonList(response.data);
-                        kelasArmada
-                            .add(ClassModel(id: "0", kelas: "Semua Kelas"));
-                        kelasArmada.sort((a, b) => a.id.compareTo(b.id));
-                        return kelasArmada;
-                      },
-                      onChanged: (ClassModel data) {
-                        if (data == null) {
-                          setState(() {
-                            variable.selectedKelasArmada = "";
-                          });
-                        } else {
-                          setState(() {
-                            variable.selectedKelasArmada = data.id;
-                          });
-                        }
-                      },
-                      showSearchBox: false,
-                    ),
-                  ),
+                  SizedBox(width: 20),
+                  Text("Self Service Agent", style: TextStyle(fontSize: 12)),
                 ],
+              )),
+          SizedBox(
+            height: 20,
+          ),
+          Container(
+            height: 40,
+            child: DropdownSearch<CityModel>(
+              mode: Mode.DIALOG,
+              showClearButton: false,
+              maxHeight: 250,
+              label: "Kota Asal",
+              showSearchBox: true,
+              selectedItem: variable.selectedFromCity,
+              searchBoxDecoration: InputDecoration(
+                labelText: "Kota Asal",
+                suffixIcon: Icon(Icons.search),
               ),
+              dropdownSearchDecoration: InputDecoration(
+                contentPadding: EdgeInsets.only(left: 10),
+                labelStyle: CustomStyle.textStyle,
+                focusedBorder: CustomStyle.focusBorder,
+                enabledBorder: CustomStyle.focusErrorBorder,
+                focusedErrorBorder: CustomStyle.focusErrorBorder,
+                errorBorder: CustomStyle.focusErrorBorder,
+                hintStyle: CustomStyle.textStyle,
+              ),
+              onFind: (String) async {
+                var response = await Dio().post(
+                  dotenv.env['BASE_URL'] + "/datakota",
+                );
+                var dataFromCity = CityModel.fromJsonList(response.data);
+                if (variable.selectedToCity == null) return dataFromCity;
+                dataFromCity.removeWhere((item) =>
+                    item.namaKota == variable.selectedToCity.toString());
+                return dataFromCity;
+              },
+              onChanged: (data) {
+                setState(() {
+                  variable.selectedFromCity = data;
+                });
+              },
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-              child: GestureDetector(
-                child: Container(
-                  height: Dimensions.buttonHeight,
-                  decoration: BoxDecoration(
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+            height: 40,
+            child: DropdownSearch<CityModel>(
+                mode: Mode.DIALOG,
+                showClearButton: false,
+                maxHeight: 250,
+                label: "Kota Tujuan",
+                showSearchBox: true,
+                selectedItem: variable.selectedToCity,
+                searchBoxDecoration: InputDecoration(
+                  labelText: "Kota Tujuan",
+                  suffixIcon: Icon(Icons.search),
+                ),
+                dropdownSearchDecoration: InputDecoration(
+                  contentPadding: EdgeInsets.only(left: 10),
+                  labelStyle: CustomStyle.textStyle,
+                  focusedBorder: CustomStyle.focusBorder,
+                  enabledBorder: CustomStyle.focusErrorBorder,
+                  focusedErrorBorder: CustomStyle.focusErrorBorder,
+                  errorBorder: CustomStyle.focusErrorBorder,
+                  hintStyle: CustomStyle.textStyle,
+                ),
+                onFind: (String) async {
+                  var response = await Dio().post(
+                    dotenv.env['BASE_URL'] + "/datakota",
+                  );
+                  var dataToCity = CityModel.fromJsonList(response.data);
+                  if (variable.selectedFromCity == null) return dataToCity;
+                  dataToCity.removeWhere((item) =>
+                      item.namaKota == variable.selectedFromCity.toString());
+                  return dataToCity;
+                },
+                onChanged: (data) {
+                  setState(() {
+                    variable.selectedToCity = data;
+                  });
+                }),
+          ),
+          Column(children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Pulang-Pergi?",
+                      style: TextStyle(fontSize: Dimensions.defaultTextSize),
+                    ),
+                    Transform.scale(
+                      scale: 0.7,
+                      child: CupertinoSwitch(
+                        activeColor: CustomColor.red,
+                        value: variable.checkPulangPergi,
+                        onChanged: (bool value) {
+                          setState(() {
+                            variable.checkPulangPergi = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  child: Transform.rotate(
+                    angle: 90 * math.pi / 180,
+                    child: IconButton(
+                      icon: Icon(Icons.swap_horiz_sharp),
                       color: CustomColor.red,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Center(
-                    child: Text(
-                      "CARI BUS",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: Dimensions.defaultTextSize),
+                      onPressed: () {
+                        setState(() {
+                          var tempFrom;
+                          var tempTo;
+                          tempFrom = variable.selectedFromCity;
+                          tempTo = variable.selectedToCity;
+                          variable.selectedFromCity = tempTo;
+                          variable.selectedToCity = tempFrom;
+                        });
+                      },
                     ),
                   ),
                 ),
-                onTap: () {
-                  if (variable.selectedFromCity == null) {
+              ],
+            ),
+            Row(
+              children: [
+                selectDatePergi(context),
+                variable.checkPulangPergi ? SizedBox(width: 10) : Container(),
+                variable.checkPulangPergi
+                    ? selectDatePulang(context)
+                    : Container(),
+              ],
+            )
+          ]),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+            height: 40,
+            child: DropdownSearch(
+              mode: Mode.BOTTOM_SHEET,
+              showClearButton: false,
+              maxHeight: 225,
+              items: jumlahPenumpang,
+              label: "Jumlah Penumpang",
+              dropdownSearchDecoration: InputDecoration(
+                contentPadding: EdgeInsets.only(left: 10),
+                labelStyle: CustomStyle.textStyle,
+                focusedBorder: CustomStyle.focusBorder,
+                enabledBorder: CustomStyle.focusErrorBorder,
+                focusedErrorBorder: CustomStyle.focusErrorBorder,
+                errorBorder: CustomStyle.focusErrorBorder,
+                hintStyle: CustomStyle.textStyle,
+              ),
+              onChanged: (jumlahPenumpang) {
+                setState(() {
+                  variable.selectedJumlahPenumpang = jumlahPenumpang;
+                });
+              },
+              showSearchBox: false,
+              selectedItem: variable.selectedJumlahPenumpang,
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+            height: 40,
+            child: DropdownSearch<ClassModel>(
+              mode: Mode.BOTTOM_SHEET,
+              maxHeight: 225,
+              label: "Kelas Armada",
+              dropdownSearchDecoration: InputDecoration(
+                contentPadding: EdgeInsets.only(left: 10),
+                labelStyle: CustomStyle.textStyle,
+                focusedBorder: CustomStyle.focusBorder,
+                enabledBorder: CustomStyle.focusErrorBorder,
+                focusedErrorBorder: CustomStyle.focusErrorBorder,
+                errorBorder: CustomStyle.focusErrorBorder,
+                hintStyle: CustomStyle.textStyle,
+              ),
+              onFind: (String) async {
+                var response = await Dio().post(
+                  dotenv.env['BASE_URL'] + "/datakelas",
+                );
+                var kelasArmada = ClassModel.fromJsonList(response.data);
+                kelasArmada.add(ClassModel(id: "0", kelas: "Semua Kelas"));
+                kelasArmada.sort((a, b) => a.id.compareTo(b.id));
+                return kelasArmada;
+              },
+              onChanged: (ClassModel data) {
+                if (data == null) {
+                  setState(() {
+                    variable.selectedKelasArmada = "";
+                  });
+                } else {
+                  setState(() {
+                    variable.selectedKelasArmada = data.id;
+                  });
+                }
+              },
+              showSearchBox: false,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          GestureDetector(
+            child: Container(
+              height: Dimensions.buttonHeight,
+              decoration: BoxDecoration(
+                  color: CustomColor.red,
+                  borderRadius: BorderRadius.circular(12)),
+              child: Center(
+                child: Text(
+                  "CARI BUS",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: Dimensions.defaultTextSize),
+                ),
+              ),
+            ),
+            onTap: () {
+              if (variable.selectedFromCity == null) {
+                Fluttertoast.showToast(
+                  msg: "Isi kota keberangkatan terlebih dahulu",
+                  backgroundColor: CustomColor.red,
+                  textColor: CustomColor.white,
+                  gravity: ToastGravity.CENTER,
+                );
+              } else {
+                if (variable.selectedToCity == null) {
+                  Fluttertoast.showToast(
+                    msg: "Isi kota tujuan terlebih dahulu",
+                    backgroundColor: CustomColor.red,
+                    textColor: CustomColor.white,
+                    gravity: ToastGravity.CENTER,
+                  );
+                } else {
+                  if (variable.selectedJumlahPenumpang == null) {
                     Fluttertoast.showToast(
-                      msg: "Isi kota keberangkatan terlebih dahulu",
+                      msg: "Isi jumlah penumpang terlebih dahulu",
                       backgroundColor: CustomColor.red,
                       textColor: CustomColor.white,
                       gravity: ToastGravity.CENTER,
                     );
                   } else {
-                    if (variable.selectedToCity == null) {
+                    if (variable.datePergi == "Pergi") {
                       Fluttertoast.showToast(
-                        msg: "Isi kota tujuan terlebih dahulu",
+                        msg: "Isi tanggal pergi terlebih dahulu",
                         backgroundColor: CustomColor.red,
                         textColor: CustomColor.white,
                         gravity: ToastGravity.CENTER,
                       );
                     } else {
-                      if (variable.selectedJumlahPenumpang == null) {
+                      if (variable.checkPulangPergi == true &&
+                          variable.datePulang == "Pulang") {
                         Fluttertoast.showToast(
-                          msg: "Isi jumlah penumpang terlebih dahulu",
+                          msg: "Isi tanggal pulang terlebih dahulu",
                           backgroundColor: CustomColor.red,
                           textColor: CustomColor.white,
                           gravity: ToastGravity.CENTER,
                         );
                       } else {
-                        if (variable.datePergi == "Pergi") {
-                          Fluttertoast.showToast(
-                            msg: "Isi tanggal pergi terlebih dahulu",
-                            backgroundColor: CustomColor.red,
-                            textColor: CustomColor.white,
-                            gravity: ToastGravity.CENTER,
-                          );
-                        } else {
-                          if (variable.checkPulangPergi == true &&
-                              variable.datePulang == "Pulang") {
-                            Fluttertoast.showToast(
-                              msg: "Isi tanggal pulang terlebih dahulu",
-                              backgroundColor: CustomColor.red,
-                              textColor: CustomColor.white,
-                              gravity: ToastGravity.CENTER,
-                            );
-                          } else {
-                            _navigateSearchResult(context);
-                          }
-                        }
+                        _navigateSearchResult(context);
                       }
                     }
                   }
-                },
-              ),
-            )
-          ],
-        ),
+                }
+              }
+            },
+          ),
+          SizedBox(
+            height: 20,
+          ),
+        ],
       ),
-    ]);
+    );
   }
 
   carouselWidget(BuildContext context) {
@@ -414,7 +406,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fit: BoxFit.cover,
                 );
               },
-              // itemCount: 1,
             ),
     );
   }
@@ -517,11 +508,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _navigateSearchResult(BuildContext context) async {
-    print("next screen");
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => SearchResultPergiScreen()),
-    // );
+    // print("next screen");
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SearchResultPergiScreen()),
+    );
     // resetVariable();
   }
 }

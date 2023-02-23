@@ -72,15 +72,15 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
         body: SizedBox(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          child: Stack(
+          child: Row(
             children: [
               headerWidget(context),
               isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? SizedBox()
                   : busNotAvailable
                       ? Center(child: Text("Bus tidak tersedia."))
                       : bodyWidget(context),
-              filterWidget(context),
+              // filterWidget(context),
             ],
           ),
         ),
@@ -90,17 +90,16 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
 
   headerWidget(BuildContext context) {
     return Container(
-        width: MediaQuery.of(context).size.width,
-        height: 170,
+        width: MediaQuery.of(context).size.width / 2.5,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24)),
+              topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
           color: CustomColor.darkGrey,
         ),
         child: Padding(
-          padding: const EdgeInsets.only(),
+          padding: EdgeInsets.only(),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
                   width: MediaQuery.of(context).size.width,
@@ -122,12 +121,7 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
                             ),
                           ),
                           onTap: () {
-                            // Navigator.pushAndRemoveUntil(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //       builder: (context) => DashboardScreen(0)),
-                            //   (Route<dynamic> route) => false,
-                            // );
+                            Navigator.pop(context);
                           },
                         ),
                         Container(
@@ -148,42 +142,42 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
                       ],
                     ),
                   )),
+              SizedBox(height: 20),
               Container(
-                margin: EdgeInsets.only(
-                  top: 20,
-                  left: 30,
-                  right: 30,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
                   children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 4,
-                      child: Text(
-                        variable.selectedFromCity.toString(),
-                        style: TextStyle(
-                            color: CustomColor.grey,
-                            fontSize: Dimensions.defaultTextSize),
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Dari: ",
+                          style: TextStyle(
+                              color: CustomColor.white,
+                              fontSize: Dimensions.defaultTextSize),
+                        ),
+                        Text(
+                          variable.selectedToCity.toString(),
+                          style: TextStyle(
+                              color: CustomColor.grey,
+                              fontSize: Dimensions.defaultTextSize),
+                        ),
+                      ],
                     ),
-                    DottedLine(
-                      direction: Axis.horizontal,
-                      lineLength: MediaQuery.of(context).size.width / 5,
-                      lineThickness: 1.0,
-                      dashLength: 5.0,
-                      dashColor: CustomColor.white,
-                      dashGapLength: 5.0,
-                      dashGapColor: Colors.transparent,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 4,
-                      child: Text(
-                        variable.selectedToCity.toString(),
-                        textAlign: TextAlign.end,
-                        style: TextStyle(
-                            color: CustomColor.grey,
-                            fontSize: Dimensions.defaultTextSize),
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Ke: ",
+                          style: TextStyle(
+                              color: CustomColor.white,
+                              fontSize: Dimensions.defaultTextSize),
+                        ),
+                        Text(
+                          variable.selectedFromCity.toString(),
+                          style: TextStyle(
+                              color: CustomColor.grey,
+                              fontSize: Dimensions.defaultTextSize),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -213,53 +207,52 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
                       : Container()
                 ],
               ),
+              Expanded(child: SizedBox()),
+              filterWidget(context),
             ],
           ),
         ));
   }
 
   filterWidget(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.bottomCenter,
-      child: GestureDetector(
-        child: Container(
-          height: 40,
-          width: 100,
-          margin: EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
-              color: CustomColor.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  spreadRadius: 1,
-                  blurRadius: 10,
-                )
-              ]),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(
-                  Icons.settings,
-                  size: Dimensions.defaultTextSize,
-                  color: CustomColor.grey,
-                ),
-                SizedBox(
-                  width: 2,
-                ),
-                Text(
-                  "Filter",
-                  style: TextStyle(color: CustomColor.grey),
-                ),
-              ]),
-            ],
-          ),
+    return GestureDetector(
+      child: Container(
+        height: 40,
+        // width: 100,
+        margin: EdgeInsets.only(bottom: 20, left: 30, right: 20),
+        decoration: BoxDecoration(
+            color: CustomColor.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                spreadRadius: 1,
+                blurRadius: 10,
+              )
+            ]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(
+                Icons.settings,
+                size: Dimensions.defaultTextSize,
+                color: CustomColor.grey,
+              ),
+              SizedBox(
+                width: 2,
+              ),
+              Text(
+                "Filter",
+                style: TextStyle(color: CustomColor.grey),
+              ),
+            ]),
+          ],
         ),
-        onTap: () {
-          _navigateFilterScreen(context);
-        },
       ),
+      onTap: () {
+        _navigateFilterScreen(context);
+      },
     );
   }
 
@@ -282,52 +275,42 @@ class _SearchResultPergiScreenState extends State<SearchResultPergiScreen> {
     if (variable.pergi_sort_by == "Kedatangan Akhir") {
       _listBus.sort((min, max) => max.pergi_end.compareTo(min.pergi_end));
     }
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 180,
-      ),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: _listBus.length,
-          itemBuilder: (context, index) {
-            BusPergi bus = _listBus[index];
-            if (index == (_listBus.length - 1)) {
-              bottomPadding = 70;
-            } else {
-              bottomPadding = Dimensions.heightSize * 1;
-            }
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: bottomPadding,
-                left: Dimensions.marginSize,
-                right: Dimensions.marginSize,
-              ),
-              child: BusTicketPergiWidget(
-                bus: bus,
-                trip_id_no: bus.pergi_trip_id_no,
-                trip_route_id: bus.pergi_trip_route_id,
-                shedule_id: bus.pergi_shedule_id,
-                pickup_trip_location: bus.pergi_pickup_trip_location,
-                drop_trip_location: bus.pergi_drop_trip_location,
-                type: bus.pergi_type,
-                type_class: bus.pergi_type_class,
-                image: bus.pergi_image,
-                fleet_seats: bus.pergi_fleet_seats,
-                fleet_registration_id: bus.pergi_fleet_seats,
-                price: bus.pergi_price,
-                duration: bus.pergi_duration,
-                start: bus.pergi_start,
-                end: bus.pergi_end,
-                seatPicked: bus.pergi_seatPicked,
-                seatAvail: bus.pergi_seatAvail,
-                resto_id: bus.pergi_resto_id,
-              ),
-            );
-          },
-        ),
+    return Expanded(
+      child: ListView.builder(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: _listBus.length,
+        itemBuilder: (context, index) {
+          BusPergi bus = _listBus[index];
+          bottomPadding = Dimensions.heightSize * 1;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: bottomPadding,
+              left: Dimensions.marginSize,
+              right: Dimensions.marginSize,
+            ),
+            child: BusTicketPergiWidget(
+              bus: bus,
+              trip_id_no: bus.pergi_trip_id_no,
+              trip_route_id: bus.pergi_trip_route_id,
+              shedule_id: bus.pergi_shedule_id,
+              pickup_trip_location: bus.pergi_pickup_trip_location,
+              drop_trip_location: bus.pergi_drop_trip_location,
+              type: bus.pergi_type,
+              type_class: bus.pergi_type_class,
+              image: bus.pergi_image,
+              fleet_seats: bus.pergi_fleet_seats,
+              fleet_registration_id: bus.pergi_fleet_seats,
+              price: bus.pergi_price,
+              duration: bus.pergi_duration,
+              start: bus.pergi_start,
+              end: bus.pergi_end,
+              seatPicked: bus.pergi_seatPicked,
+              seatAvail: bus.pergi_seatAvail,
+              resto_id: bus.pergi_resto_id,
+            ),
+          );
+        },
       ),
     );
   }

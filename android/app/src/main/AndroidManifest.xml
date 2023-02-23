@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.j99_mobile_flutter_self_service">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="j99_mobile_flutter_self_service"
         android:name="${applicationName}"
